@@ -9,7 +9,7 @@ import { AuthGuard } from '@nestjs/passport'
 
 import { IS_PUBLIC_KEY } from '@/auth/decorators/public.decorator'
 
-import { UserPayload } from 'types/auth'
+import { JwtPayload } from 'types/auth'
 
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -32,7 +32,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
     return ctx.getContext().req
   }
 
-  handleRequest<TUser = UserPayload>(err: Error, user: TUser): TUser {
+  handleRequest<TUser = JwtPayload>(err: Error, user: TUser): TUser {
     if (err || !user) {
       throw new UnauthorizedException('The access token is invalid')
     }

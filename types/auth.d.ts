@@ -1,8 +1,9 @@
-export interface UserPayload {
-  id: string
+export interface JwtPayload {
+  userId: string
+  refreshTokenId: string
 }
 
-export interface JwtValidatePayload extends UserPayload {
+export type JwtValidatePayload<T> = T & {
   iat: number
   exp: number
 }

@@ -2,12 +2,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator nestgraphql {
-  provider    = "prisma-nestjs-graphql"
-  output      = "../src/generated/prisma-graphql"
-  reExport    = Directories
-  purgeOutput = true
-}
+// generator nestgraphql {
+//   provider    = "prisma-nestjs-graphql"
+//   output      = "../src/generated/prisma-graphql"
+//   reExport    = Directories
+//   purgeOutput = true
+// }
 
 datasource db {
   provider = "postgresql"
@@ -21,15 +21,16 @@ enum ChannelType {
 }
 
 model User {
-  id           String  @id @default(cuid())
-  email        String  @unique
-  username     String  @unique
-  name         String?
-  password     String
-  refreshToken String?
+  id       String  @id @default(cuid())
+  email    String  @unique
+  username String  @unique
+  name     String?
+  password String
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  sessions Session[]
 
   channels      Channel[] @relation(name: "UsersOnChannels")
   ownerChannels Channel[] @relation(name: "OwnerChannels")
@@ -40,6 +41,20 @@ model User {
   @@map("users")
 }
 
+model Session {
+  id       String  @id @default(cuid())
+  browser  String?
+  os       String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId String @map("user_id")
+
+  @@map("sessions")
+}
+
 model Message {
   id   String @id @default(cuid())
   text String
@@ -47,8 +62,8 @@ model Message {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  author    User   @relation(name: "UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
-  authorId  String @map("user_id")
+  author    User    @relation(name: "UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String  @map("user_id")
   channel   Channel @relation(name: "ChannelMessages", fields: [channelId], references: [id], onDelete: Cascade)
   channelId String  @map("channel_id")
 

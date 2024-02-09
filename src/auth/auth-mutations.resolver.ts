@@ -6,22 +6,41 @@ import { AuthService } from '@/auth/auth.service'
 import { CurrentUser } from '@/auth/decorators/current-user.decorator'
 import { LoginArgs } from '@/auth/dto/auth-mutations.dto'
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh.guard'
+import { SessionsService } from '@/auth/sessions.service'
 import { User } from '@/users/models/user.model'
 import { UsersService } from '@/users/users.service'
 import { Public } from './decorators/public.decorator'
 
-import { UserPayload } from 'types/auth'
+import { JwtPayload } from 'types/auth'
 
 @Resolver()
 export class AuthMutationsResolver {
   constructor(
     private authService: AuthService,
+    private sessionsService: SessionsService,
     private userService: UsersService
   ) {}
 
   @Mutation(() => User, { nullable: true })
   @Public()
-  async login(@Args() args: LoginArgs, @Context('res') res: Response) {
+  async login(
+    @Args() args: LoginArgs,
+    @Context('res') res: Response,
+    @Context('req') req: Request
+  ) {
+    const accessToken = req.cookies['accessToken']
+
+    if (accessToken) {
+      const logged = await this.sessionsService
+        .verifyAccessToken(accessToken)
+        .then(() => true)
+        .catch(() => false)
+
+      if (logged) {
+        throw new UnauthorizedException('Already logged in')
+      }
+    }
+
     const payload = await this.authService.validateUser(
       args.email,
       args.password
@@ -31,21 +50,31 @@ export class AuthMutationsResolver {
       throw new UnauthorizedException('Invalid credentials')
     }
 
-    const tokens = await this.authService.generateNewTokens(payload)
-    await this.authService.updateRefreshToken(payload.id, tokens.refreshToken)
+    const tokens = await this.sessionsService.createAndSaveTokens(
+      payload.userId,
+      req.get('user-agent')
+    )
 
-    this.authService.createTokenCookie(res, tokens.accessToken, 'accessToken')
-    this.authService.createTokenCookie(res, tokens.refreshToken, 'refreshToken')
+    this.sessionsService.createTokenCookie(
+      res,
+      tokens.accessToken,
+      'accessToken'
+    )
+    this.sessionsService.createTokenCookie(
+      res,
+      tokens.refreshToken,
+      'refreshToken'
+    )
 
-    return this.userService.getUser({ id: payload.id })
+    return this.userService.getUser({ id: payload.userId })
   }
 
   @Mutation(() => Boolean, { nullable: true })
   async logout(
     @Context('res') res: Response,
-    @CurrentUser() user: UserPayload
+    @CurrentUser() payload: JwtPayload
   ) {
-    await this.authService.updateRefreshToken(user.id, null)
+    await this.sessionsService.deleteRefreshToken(payload.refreshTokenId)
 
     res.clearCookie('accessToken')
     res.clearCookie('refreshToken')
@@ -57,16 +86,32 @@ export class AuthMutationsResolver {
   @Public()
   @UseGuards(JwtRefreshAuthGuard)
   async refreshTokens(
-    @Context('req') req: Request,
     @Context('res') res: Response,
-    @CurrentUser() user: UserPayload
+    @CurrentUser() payload: JwtPayload
   ) {
-    const refreshToken = req.cookies['refreshToken']
+    const tokens = await this.sessionsService.refreshTokens(
+      payload.refreshTokenId
+    )
 
-    const tokens = await this.authService.refreshTokens(user.id, refreshToken)
+    this.sessionsService.createTokenCookie(
+      res,
+      tokens.accessToken,
+      'accessToken'
+    )
+    this.sessionsService.createTokenCookie(
+      res,
+      tokens.refreshToken,
+      'refreshToken'
+    )
 
-    this.authService.createTokenCookie(res, tokens.accessToken, 'accessToken')
-    this.authService.createTokenCookie(res, tokens.refreshToken, 'refreshToken')
+    return true
+  }
+
+  @Mutation(() => Boolean, { nullable: true })
+  @Public()
+  @UseGuards(JwtRefreshAuthGuard)
+  async revokeRefreshToken(@Args('refreshTokenId') refreshTokenId: string) {
+    await this.sessionsService.deleteRefreshToken(refreshTokenId)
 
     return true
   }

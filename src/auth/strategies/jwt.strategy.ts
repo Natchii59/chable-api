@@ -4,7 +4,7 @@ import { PassportStrategy } from '@nestjs/passport'
 import { Request } from 'express'
 import { ExtractJwt, Strategy } from 'passport-jwt'
 
-import type { JwtValidatePayload, UserPayload } from 'types/auth'
+import type { JwtPayload, JwtValidatePayload } from 'types/auth'
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -30,11 +30,12 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     return null
   }
 
-  validate(payload: JwtValidatePayload): UserPayload {
+  validate(payload: JwtValidatePayload<JwtPayload>): JwtPayload {
     if (!payload) return null
 
     return {
-      id: payload.id
+      refreshTokenId: payload.refreshTokenId,
+      userId: payload.userId
     }
   }
 }
