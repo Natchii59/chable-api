@@ -5,7 +5,7 @@
   "trailingComma": "none",
   "bracketSpacing": true,
   "arrowParens": "avoid",
-  "printWidth": 100,
+  "printWidth": 80,
   "importOrder": [
     "<THIRD_PARTY_MODULES>",
     "",

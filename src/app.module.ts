@@ -1,16 +1,51 @@
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import { Module } from '@nestjs/common'
+import { ConfigModule } from '@nestjs/config'
+import { APP_GUARD } from '@nestjs/core'
 import { GraphQLModule } from '@nestjs/graphql'
 
+import { JwtAuthGuard } from '@/auth/guards/jwt.guard'
+import { AuthModule } from './auth/auth.module'
+import { DatabaseModule } from './database/database.module'
 import { UsersModule } from './users/users.module'
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: '.env',
+      isGlobal: true
+    }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: 'src/graphql/schema.gql'
+      playground: false,
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
+      autoSchemaFile: 'src/graphql/schema.gql',
+      sortSchema: true,
+      fieldResolverEnhancers: ['guards'],
+      context: ({ req, res }) => ({ req, res }),
+      formatError: err => {
+        const { originalError } = err.extensions as any
+
+        if (originalError) {
+          return {
+            ...originalError,
+            path: err.path
+          }
+        }
+
+        return err
+      }
     }),
-    UsersModule
+    DatabaseModule,
+    UsersModule,
+    AuthModule
+  ],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: JwtAuthGuard
+    }
   ]
 })
 export class AppModule {}

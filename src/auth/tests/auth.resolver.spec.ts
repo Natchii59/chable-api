@@ -1,16 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing'
 
-import { UsersQueriesResolver } from '../users-queries.resolver'
+import { AuthMutationsResolver } from '../auth-mutations.resolver'
 
-describe('UsersResolver', () => {
-  let resolver: UsersQueriesResolver
+describe('AuthResolver', () => {
+  let resolver: AuthMutationsResolver
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UsersQueriesResolver]
+      providers: [AuthMutationsResolver]
     }).compile()
 
-    resolver = module.get<UsersQueriesResolver>(UsersQueriesResolver)
+    resolver = module.get<AuthMutationsResolver>(AuthMutationsResolver)
   })
 
   it('should be defined', () => {

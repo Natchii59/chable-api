@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator nestgraphql {
+  provider    = "prisma-nestjs-graphql"
+  output      = "../src/generated/prisma-graphql"
+  reExport    = Directories
+  purgeOutput = true
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum ChannelType {
+  PUBLIC
+  PRIVATE
+  GROUP
+}
+
+model User {
+  id           String  @id @default(cuid())
+  email        String  @unique
+  username     String  @unique
+  name         String?
+  password     String
+  refreshToken String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  channels      Channel[] @relation(name: "UsersOnChannels")
+  ownerChannels Channel[] @relation(name: "OwnerChannels")
+
+  messages     Message[] @relation(name: "UserMessages")
+  readMessages Message[] @relation(name: "ReadMessages")
+
+  @@map("users")
+}
+
+model Message {
+  id   String @id @default(cuid())
+  text String
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  author    User   @relation(name: "UserMessages", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId  String @map("user_id")
+  channel   Channel @relation(name: "ChannelMessages", fields: [channelId], references: [id], onDelete: Cascade)
+  channelId String  @map("channel_id")
+
+  readBy User[] @relation(name: "ReadMessages")
+
+  @@map("messages")
+}
+
+model Channel {
+  id          String      @id @default(cuid())
+  name        String?
+  description String?
+  type        ChannelType
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  owner   User?   @relation(fields: [ownerId], references: [id], name: "OwnerChannels", onDelete: Cascade)
+  ownerId String? @map("owner_id")
+
+  messages Message[] @relation(name: "ChannelMessages")
+  users    User[]    @relation(name: "UsersOnChannels")
+
+  @@map("channels")
+}
