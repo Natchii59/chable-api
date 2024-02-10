@@ -67,9 +67,6 @@ export class UserOrderByInput {
   name?: SortOrderInput
 
   @Field(() => SortOrder, { nullable: true })
-  password?: keyof typeof SortOrder
-
-  @Field(() => SortOrder, { nullable: true })
   createdAt?: keyof typeof SortOrder
 
   @Field(() => SortOrder, { nullable: true })
@@ -92,24 +89,15 @@ export class FindManyUserArgs {
   @Field(() => [UserOrderByInput], { nullable: true })
   orderBy?: Array<UserOrderByInput>
 
-  @Field(() => UserWhereUniqueInput, { nullable: true })
-  cursor?: Prisma.AtLeast<UserWhereUniqueInput, 'id' | 'email' | 'username'>
-
   @Field(() => Int, { nullable: true })
   take?: number
 
   @Field(() => Int, { nullable: true })
   skip?: number
-
-  @Field(() => Boolean, { nullable: true })
-  withCount?: boolean
 }
 
 @ObjectType()
 export class FindManyUserObject {
   @Field(() => [User])
-  nodes: User[]
-
-  @Field(() => Int, { nullable: true })
-  count?: number
+  users: User[]
 }

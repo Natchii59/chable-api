@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common'
 
 import { compareHash } from '@/lib/hash'
-import { UsersService } from '@/users/users.service'
+import type { UsersService } from '@/users/users.service'
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
   async validateUser(email: string, password: string) {
-    const user = await this.userService.getUser({ email })
+    const user = await this.usersService.getUser({ email })
 
     if (!user) {
       return null

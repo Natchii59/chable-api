@@ -1,7 +1,7 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 
-import { DatabaseService } from '@/database/database.service'
+import type { DatabaseService } from '@/database/database.service'
 import { hashString } from '@/lib/hash'
 
 @Injectable()
@@ -20,17 +20,7 @@ export class UsersService {
       })
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
-        if (err.code === 'P2002') {
-          const target = err.meta.target as string[]
-
-          if (target.includes('email')) {
-            throw new BadRequestException('Email already exists')
-          } else if (target.includes('username')) {
-            throw new BadRequestException('Username already exists')
-          } else {
-            throw new BadRequestException('User already exists')
-          }
-        }
+        this.verifyUserPrismaError(err)
       } else {
         throw new HttpException('Internal Server Error', 500)
       }
@@ -45,14 +35,40 @@ export class UsersService {
     return this.db.user.findMany(args)
   }
 
-  countUsers(args: Prisma.UserCountArgs) {
-    return this.db.user.count(args)
+  countUsers(where: Prisma.UserWhereInput) {
+    return this.db.user.count({ where })
   }
 
-  updateUser(id: string, data: Prisma.UserUncheckedUpdateInput) {
-    return this.db.user.update({
-      where: { id },
-      data
-    })
+  async updateUser(id: string, data: Prisma.UserUncheckedUpdateInput) {
+    try {
+      return await this.db.user.update({
+        where: { id },
+        data
+      })
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError) {
+        this.verifyUserPrismaError(err)
+      } else {
+        throw new HttpException('Internal Server Error', 500)
+      }
+    }
+  }
+
+  deleteUser(id: string) {
+    return this.db.user.delete({ where: { id } })
+  }
+
+  private verifyUserPrismaError(err: Prisma.PrismaClientKnownRequestError) {
+    if (err.code === 'P2002') {
+      const target = err.meta.target as string[]
+
+      if (target.includes('email')) {
+        throw new BadRequestException('Email already exists')
+      } else if (target.includes('username')) {
+        throw new BadRequestException('Username already exists')
+      } else {
+        throw new BadRequestException('User already exists')
+      }
+    }
   }
 }

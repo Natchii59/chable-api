@@ -1,12 +1,12 @@
 import {
-  ExecutionContext,
   Injectable,
-  UnauthorizedException
+  UnauthorizedException,
+  type ExecutionContext
 } from '@nestjs/common'
 import { GqlExecutionContext } from '@nestjs/graphql'
 import { AuthGuard } from '@nestjs/passport'
 
-import { JwtPayload } from 'types/auth'
+import type { JwtPayload } from 'types/auth'
 
 @Injectable()
 export class JwtRefreshAuthGuard extends AuthGuard('jwt-refresh') {

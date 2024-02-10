@@ -1,24 +1,24 @@
 import { UnauthorizedException, UseGuards } from '@nestjs/common'
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
-import { Request, Response } from 'express'
+import type { Request, Response } from 'express'
 
-import { AuthService } from '@/auth/auth.service'
+import type { AuthService } from '@/auth/auth.service'
 import { CurrentUser } from '@/auth/decorators/current-user.decorator'
-import { LoginArgs } from '@/auth/dto/auth-mutations.dto'
+import type { LoginArgs } from '@/auth/dto/auth-mutations.dto'
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh.guard'
-import { SessionsService } from '@/auth/sessions.service'
+import type { SessionsService } from '@/auth/sessions.service'
 import { User } from '@/users/models/user.model'
-import { UsersService } from '@/users/users.service'
+import type { UsersService } from '@/users/users.service'
 import { Public } from './decorators/public.decorator'
 
-import { JwtPayload } from 'types/auth'
+import type { JwtPayload } from 'types/auth'
 
 @Resolver()
 export class AuthMutationsResolver {
   constructor(
     private authService: AuthService,
     private sessionsService: SessionsService,
-    private userService: UsersService
+    private usersService: UsersService
   ) {}
 
   @Mutation(() => User, { nullable: true })
@@ -66,7 +66,7 @@ export class AuthMutationsResolver {
       'refreshToken'
     )
 
-    return this.userService.getUser({ id: payload.userId })
+    return this.usersService.getUser({ id: payload.userId })
   }
 
   @Mutation(() => Boolean, { nullable: true })

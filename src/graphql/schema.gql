@@ -2,7 +2,7 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreateUserInput {
+input CreateUserData {
   email: String!
   password: String!
   username: String!
@@ -25,16 +25,18 @@ input DateTimeFilter {
 }
 
 type FindManyUserObject {
-  count: Int
-  nodes: [User!]!
+  count: Int!
+  users: [User!]!
 }
 
 type Mutation {
-  createUser(input: CreateUserInput!): User
+  createUser(data: CreateUserData!): User
+  deleteUser: User
   login(email: String!, password: String!): User
   logout: Boolean
   refreshTokens: Boolean
   revokeRefreshToken(refreshTokenId: String!): Boolean
+  updateUser(data: UpdateUserData!): User
 }
 
 enum NullsOrder {
@@ -44,7 +46,7 @@ enum NullsOrder {
 
 type Query {
   getUser(where: UserWhereUniqueInput!): User
-  getUsers(cursor: UserWhereUniqueInput, orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput, withCount: Boolean): FindManyUserObject
+  getUsers(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): FindManyUserObject
   profile: User
 }
 
@@ -78,6 +80,13 @@ input StringFilter {
   startsWith: String
 }
 
+input UpdateUserData {
+  email: String
+  name: String
+  password: String
+  username: String
+}
+
 type User {
   createdAt: DateTime!
   email: String!
@@ -92,7 +101,6 @@ input UserOrderByInput {
   email: SortOrder
   id: SortOrder
   name: SortOrderInput
-  password: SortOrder
   updatedAt: SortOrder
   username: SortOrder
 }

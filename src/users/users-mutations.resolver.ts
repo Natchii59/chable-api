@@ -1,17 +1,35 @@
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 
+import { CurrentUser } from '@/auth/decorators/current-user.decorator'
 import { Public } from '@/auth/decorators/public.decorator'
-import { CreateUserInput } from '@/users/dto/users-mutations.dto'
+import type {
+  CreateUserArgs,
+  UpdateUserArgs
+} from '@/users/dto/users-mutations.dto'
 import { User } from '@/users/models/user.model'
-import { UsersService } from '@/users/users.service'
+import type { UsersService } from '@/users/users.service'
+
+import { JwtPayload } from 'types/auth'
 
 @Resolver()
 export class UsersMutationsResolver {
-  constructor(private userService: UsersService) {}
+  constructor(private usersService: UsersService) {}
 
   @Mutation(() => User, { nullable: true })
   @Public()
-  createUser(@Args('input') input: CreateUserInput) {
-    return this.userService.createUser(input)
+  createUser(@Args() args: CreateUserArgs) {
+    return this.usersService.createUser(args.data)
+  }
+
+  @Mutation(() => User, { nullable: true })
+  updateUser(@Args() args: UpdateUserArgs, @CurrentUser() payload: JwtPayload) {
+    const { userId } = payload
+    return this.usersService.updateUser(userId, args.data)
+  }
+
+  @Mutation(() => User, { nullable: true })
+  deleteUser(@CurrentUser() payload: JwtPayload) {
+    const { userId } = payload
+    return this.usersService.deleteUser(userId)
   }
 }

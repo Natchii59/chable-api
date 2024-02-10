@@ -1,8 +1,18 @@
-import { Resolver } from '@nestjs/graphql'
+import { Int, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { UsersService } from '@/users/users.service'
+import { ParentArgs } from '@/lib/parent-args.decorator'
+import {
+  FindManyUserObject,
+  type FindManyUserArgs
+} from '@/users/dto/users-queries.dto'
+import type { UsersService } from '@/users/users.service'
 
-@Resolver()
+@Resolver(() => FindManyUserObject)
 export class UsersFieldsResolver {
-  constructor(private userService: UsersService) {}
+  constructor(private usersService: UsersService) {}
+
+  @ResolveField(() => Int)
+  count(@ParentArgs() parentArgs: FindManyUserArgs) {
+    return this.usersService.countUsers(parentArgs.where)
+  }
 }
