@@ -2,10 +2,10 @@ import { Int, ResolveField, Resolver } from '@nestjs/graphql'
 
 import { ParentArgs } from '@/lib/parent-args.decorator'
 import {
-  FindManyUserObject,
-  type FindManyUserArgs
+  FindManyUserArgs,
+  FindManyUserObject
 } from '@/users/dto/users-queries.dto'
-import type { UsersService } from '@/users/users.service'
+import { UsersService } from '@/users/users.service'
 
 @Resolver(() => FindManyUserObject)
 export class UsersFieldsResolver {

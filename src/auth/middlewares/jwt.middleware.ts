@@ -1,7 +1,7 @@
-import { Injectable, type NestMiddleware } from '@nestjs/common'
-import type { NextFunction, Request, Response } from 'express'
+import { Injectable, NestMiddleware } from '@nestjs/common'
+import { NextFunction, Request, Response } from 'express'
 
-import type { SessionsService } from '@/auth/sessions.service'
+import { SessionsService } from '@/auth/sessions.service'
 
 @Injectable()
 export class JwtMiddleware implements NestMiddleware {

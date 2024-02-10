@@ -2,9 +2,9 @@ import { Query, Resolver } from '@nestjs/graphql'
 
 import { CurrentUser } from '@/auth/decorators/current-user.decorator'
 import { User } from '@/users/models/user.model'
-import type { UsersService } from '@/users/users.service'
+import { UsersService } from '@/users/users.service'
 
-import type { JwtPayload } from 'types/auth'
+import { JwtPayload } from 'types/auth'
 
 @Resolver()
 export class AuthQueriesResolver {

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common'
 
 import { compareHash } from '@/lib/hash'
-import type { UsersService } from '@/users/users.service'
+import { UsersService } from '@/users/users.service'
 
 @Injectable()
 export class AuthService {

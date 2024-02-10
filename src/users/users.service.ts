@@ -1,7 +1,7 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 
-import type { DatabaseService } from '@/database/database.service'
+import { DatabaseService } from '@/database/database.service'
 import { hashString } from '@/lib/hash'
 
 @Injectable()

@@ -1,12 +1,12 @@
 import { Args, Query, Resolver } from '@nestjs/graphql'
 
 import {
+  FindManyUserArgs,
   FindManyUserObject,
-  type FindManyUserArgs,
-  type FindUniqueUserArgs
+  FindUniqueUserArgs
 } from '@/users/dto/users-queries.dto'
 import { User } from '@/users/models/user.model'
-import type { UsersService } from '@/users/users.service'
+import { UsersService } from '@/users/users.service'
 
 @Resolver()
 export class UsersQueriesResolver {

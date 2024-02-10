@@ -1,10 +1,10 @@
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
-import { ApolloDriver, type ApolloDriverConfig } from '@nestjs/apollo'
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import {
+  MiddlewareConsumer,
   Module,
-  RequestMethod,
-  type MiddlewareConsumer,
-  type NestModule
+  NestModule,
+  RequestMethod
 } from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'

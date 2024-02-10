@@ -1,17 +1,17 @@
 import { UnauthorizedException, UseGuards } from '@nestjs/common'
 import { Args, Context, Mutation, Resolver } from '@nestjs/graphql'
-import type { Request, Response } from 'express'
+import { Request, Response } from 'express'
 
-import type { AuthService } from '@/auth/auth.service'
+import { AuthService } from '@/auth/auth.service'
 import { CurrentUser } from '@/auth/decorators/current-user.decorator'
-import type { LoginArgs } from '@/auth/dto/auth-mutations.dto'
+import { LoginArgs } from '@/auth/dto/auth-mutations.dto'
 import { JwtRefreshAuthGuard } from '@/auth/guards/jwt-refresh.guard'
-import type { SessionsService } from '@/auth/sessions.service'
+import { SessionsService } from '@/auth/sessions.service'
 import { User } from '@/users/models/user.model'
-import type { UsersService } from '@/users/users.service'
+import { UsersService } from '@/users/users.service'
 import { Public } from './decorators/public.decorator'
 
-import type { JwtPayload } from 'types/auth'
+import { JwtPayload } from 'types/auth'
 
 @Resolver()
 export class AuthMutationsResolver {

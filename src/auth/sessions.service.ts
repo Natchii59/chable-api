@@ -1,13 +1,13 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common'
-import type { ConfigService } from '@nestjs/config'
-import type { JwtService } from '@nestjs/jwt'
+import { ConfigService } from '@nestjs/config'
+import { JwtService } from '@nestjs/jwt'
 import { createId } from '@paralleldrive/cuid2'
-import type { Response } from 'express'
+import { Response } from 'express'
 import { UAParser } from 'ua-parser-js'
 
-import type { DatabaseService } from '@/database/database.service'
+import { DatabaseService } from '@/database/database.service'
 
-import type { JwtPayload } from 'types/auth'
+import { JwtPayload } from 'types/auth'
 
 @Injectable()
 export class SessionsService {

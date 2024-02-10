@@ -1,6 +1,6 @@
-import type { ValidationError } from 'class-validator'
+import { ValidationError } from 'class-validator'
 
-import type { GraphQLErrorMessage } from 'types/graphql'
+import { GraphQLErrorMessage } from 'types/graphql'
 
 export function formatErrorMessages(
   errors: ValidationError[],

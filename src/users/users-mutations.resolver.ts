@@ -2,12 +2,9 @@ import { Args, Mutation, Resolver } from '@nestjs/graphql'
 
 import { CurrentUser } from '@/auth/decorators/current-user.decorator'
 import { Public } from '@/auth/decorators/public.decorator'
-import type {
-  CreateUserArgs,
-  UpdateUserArgs
-} from '@/users/dto/users-mutations.dto'
+import { CreateUserArgs, UpdateUserArgs } from '@/users/dto/users-mutations.dto'
 import { User } from '@/users/models/user.model'
-import type { UsersService } from '@/users/users.service'
+import { UsersService } from '@/users/users.service'
 
 import { JwtPayload } from 'types/auth'
 
