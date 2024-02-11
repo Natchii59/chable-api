@@ -8,6 +8,7 @@ import {
   ValidateIf,
   ValidateNested
 } from 'class-validator'
+import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal'
 
 @InputType()
 export class CreateUserData {
@@ -60,6 +61,9 @@ export class UpdateUserData {
   @Length(3, 30)
   @ValidateIf((_o, v) => v !== undefined && v !== null)
   name?: string
+
+  @Field(() => GraphQLUpload, { nullable: true })
+  avatar?: Promise<FileUpload>
 }
 
 @ArgsType()

@@ -1,6 +1,9 @@
 import { Module } from '@nestjs/common'
 
-import { UsersFieldsResolver } from '@/users/users-fields.resolver'
+import {
+  FindUsersFieldsResolver,
+  UsersFieldsResolver
+} from '@/users/users-fields.resolver'
 import { UsersMutationsResolver } from '@/users/users-mutations.resolver'
 import { UsersQueriesResolver } from './users-queries.resolver'
 import { UsersService } from './users.service'
@@ -10,6 +13,7 @@ import { UsersService } from './users.service'
     UsersQueriesResolver,
     UsersMutationsResolver,
     UsersFieldsResolver,
+    FindUsersFieldsResolver,
     UsersService
   ],
   exports: [UsersService]

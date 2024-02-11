@@ -89,6 +89,7 @@ export class AuthMutationsResolver {
     @Context('res') res: Response,
     @CurrentUser() payload: JwtPayload
   ) {
+    console.log('refreshTokens')
     const tokens = await this.sessionsService.refreshTokens(
       payload.refreshTokenId
     )

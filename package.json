@@ -29,6 +29,7 @@
     "@nestjs/jwt": "^10.2.0",
     "@nestjs/passport": "^10.0.3",
     "@nestjs/platform-express": "^10.3.2",
+    "@nestjs/serve-static": "^4.0.1",
     "@paralleldrive/cuid2": "^2.2.2",
     "@prisma/client": "^5.9.1",
     "bcrypt": "^5.1.1",
@@ -43,6 +44,7 @@
     "prisma-nestjs-graphql": "^20.0.2",
     "reflect-metadata": "^0.2.1",
     "rxjs": "^7.8.1",
+    "sharp": "^0.33.2",
     "ua-parser-js": "^1.0.37"
   },
   "devDependencies": {

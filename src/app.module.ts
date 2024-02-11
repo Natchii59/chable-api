@@ -1,3 +1,4 @@
+import { join } from 'path'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import {
@@ -9,11 +10,13 @@ import {
 import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { GraphQLModule } from '@nestjs/graphql'
+import { ServeStaticModule } from '@nestjs/serve-static'
 
 import { JwtAuthGuard } from '@/auth/guards/jwt.guard'
 import { JwtMiddleware } from '@/auth/middlewares/jwt.middleware'
 import { AuthModule } from './auth/auth.module'
 import { DatabaseModule } from './database/database.module'
+import { UploadsModule } from './uploads/uploads.module'
 import { UsersModule } from './users/users.module'
 
 @Module({
@@ -23,6 +26,7 @@ import { UsersModule } from './users/users.module'
       isGlobal: true
     }),
     GraphQLModule.forRoot<ApolloDriverConfig>({
+      csrfPrevention: false,
       driver: ApolloDriver,
       playground: false,
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
@@ -43,9 +47,14 @@ import { UsersModule } from './users/users.module'
         return err
       }
     }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/cdn'
+    }),
     DatabaseModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    UploadsModule
   ],
   providers: [
     {

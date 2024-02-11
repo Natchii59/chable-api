@@ -1,6 +1,7 @@
 import { BadRequestException, ValidationPipe } from '@nestjs/common'
 import { NestFactory } from '@nestjs/core'
 import * as cookieParser from 'cookie-parser'
+import { graphqlUploadExpress } from 'graphql-upload-minimal'
 
 import { formatErrorMessages } from '@/lib/format'
 import { AppModule } from './app.module'
@@ -17,6 +18,8 @@ async function bootstrap() {
       transform: true
     })
   )
+
+  app.use(graphqlUploadExpress({ maxFileSize: 10000000 })) // 10 MB limit
 
   app.use(cookieParser())
 

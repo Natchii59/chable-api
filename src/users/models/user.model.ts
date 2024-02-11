@@ -14,6 +14,9 @@ export class User {
   @Field(() => String, { nullable: true })
   name: string | null
 
+  @Field(() => String, { nullable: true })
+  avatarKey: string | null
+
   @Field(() => Date)
   createdAt: Date
 

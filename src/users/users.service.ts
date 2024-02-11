@@ -1,12 +1,17 @@
 import { BadRequestException, HttpException, Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
+import { FileUpload } from 'graphql-upload-minimal'
 
 import { DatabaseService } from '@/database/database.service'
 import { hashString } from '@/lib/hash'
+import { UploadsService } from '@/uploads/uploads.service'
 
 @Injectable()
 export class UsersService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private upload: UploadsService
+  ) {}
 
   async createUser(input: Prisma.UserCreateInput) {
     try {
@@ -39,19 +44,61 @@ export class UsersService {
     return this.db.user.count({ where })
   }
 
-  async updateUser(id: string, data: Prisma.UserUncheckedUpdateInput) {
+  async updateUser(
+    id: string,
+    data: Prisma.UserUncheckedUpdateInput & {
+      avatar?: Promise<FileUpload> | null
+    }
+  ) {
     try {
+      const { avatar, ...restData } = data
+      let avatarKey: string | null = undefined
+
+      if (data.avatar !== undefined) {
+        avatarKey = await this.updateUserAvatar(id, avatar)
+      }
+
       return await this.db.user.update({
         where: { id },
-        data
+        data: {
+          ...restData,
+          avatarKey
+        }
       })
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError) {
         this.verifyUserPrismaError(err)
       } else {
-        throw new HttpException('Internal Server Error', 500)
+        throw err
       }
     }
+  }
+
+  async updateUserAvatar(
+    userId: string,
+    avatar: Promise<FileUpload> | null
+  ): Promise<string | null> {
+    const user = await this.db.user.findUnique({
+      where: { id: userId },
+      select: { avatarKey: true }
+    })
+
+    if (!user) {
+      throw new BadRequestException('User not found')
+    }
+
+    if (user.avatarKey) {
+      await this.upload.deleteFile('avatars', user.avatarKey)
+    }
+
+    if (!avatar) {
+      return null
+    }
+
+    return this.upload.uploadFile('avatars', avatar, {
+      width: 512,
+      height: 512
+    })
   }
 
   deleteUser(id: string) {
