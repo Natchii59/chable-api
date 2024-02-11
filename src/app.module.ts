@@ -14,6 +14,7 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 
 import { JwtAuthGuard } from '@/auth/guards/jwt.guard'
 import { JwtMiddleware } from '@/auth/middlewares/jwt.middleware'
+import { SocketModule } from '@/socket/socket.module'
 import { AuthModule } from './auth/auth.module'
 import { DatabaseModule } from './database/database.module'
 import { UploadsModule } from './uploads/uploads.module'
@@ -32,7 +33,6 @@ import { UsersModule } from './users/users.module'
       plugins: [ApolloServerPluginLandingPageLocalDefault()],
       autoSchemaFile: 'src/graphql/schema.gql',
       sortSchema: true,
-      fieldResolverEnhancers: ['guards'],
       context: ({ req, res }) => ({ req, res }),
       formatError: err => {
         const { originalError } = err.extensions as any
@@ -54,7 +54,8 @@ import { UsersModule } from './users/users.module'
     DatabaseModule,
     UsersModule,
     AuthModule,
-    UploadsModule
+    UploadsModule,
+    SocketModule
   ],
   providers: [
     {
