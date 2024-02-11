@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client'
 import { FileUpload } from 'graphql-upload-minimal'
 
 import { DatabaseService } from '@/database/database.service'
-import { hashString } from '@/lib/hash'
+import { compareHash, hashString } from '@/lib/hash'
 import { UploadsService } from '@/uploads/uploads.service'
 
 @Injectable()
@@ -99,6 +99,39 @@ export class UsersService {
       width: 512,
       height: 512
     })
+  }
+
+  async updateUserPassword(
+    id: string,
+    data: { password: string; oldPassword: string; refreshTokenId: string }
+  ) {
+    const user = await this.db.user.findUnique({ where: { id } })
+
+    if (!user) {
+      throw new BadRequestException('User not found')
+    }
+
+    const isPasswordValid = await compareHash(data.oldPassword, user.password)
+
+    if (!isPasswordValid) {
+      throw new BadRequestException('Invalid password')
+    }
+
+    const hashedPassword = await hashString(data.password)
+
+    const userUpdated = await this.db.user.update({
+      where: { id },
+      data: { password: hashedPassword }
+    })
+
+    await this.db.session.deleteMany({
+      where: {
+        userId: id,
+        id: { not: data.refreshTokenId }
+      }
+    })
+
+    return userUpdated
   }
 
   deleteUser(id: string) {

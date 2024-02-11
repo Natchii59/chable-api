@@ -1,6 +1,6 @@
 import { Int, Parent, ResolveField, Resolver } from '@nestjs/graphql'
 
-import { ParentArgs } from '@/lib/parent-args.decorator'
+import { ParentArgs } from '@/lib/decorators/parent-args.decorator'
 import { UploadsService } from '@/uploads/uploads.service'
 import {
   FindManyUserArgs,

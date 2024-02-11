@@ -37,6 +37,7 @@ type Mutation {
   refreshTokens: Boolean
   revokeRefreshToken(refreshTokenId: String!): Boolean
   updateUser(data: UpdateUserData!): User
+  updateUserPassword(data: UpdateUserPasswordInput!): Boolean
 }
 
 enum NullsOrder {
@@ -84,8 +85,13 @@ input UpdateUserData {
   avatar: Upload
   email: String
   name: String
-  password: String
   username: String
+}
+
+input UpdateUserPasswordInput {
+  confirmPassword: String!
+  oldPassword: String!
+  password: String!
 }
 
 """The `Upload` scalar type represents a file upload."""

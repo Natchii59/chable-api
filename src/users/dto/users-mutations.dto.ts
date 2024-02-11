@@ -10,6 +10,8 @@ import {
 } from 'class-validator'
 import { FileUpload, GraphQLUpload } from 'graphql-upload-minimal'
 
+import { IsMatchWith } from '@/lib/decorators/match-with.decorator'
+
 @InputType()
 export class CreateUserData {
   @Field(() => String)
@@ -18,9 +20,19 @@ export class CreateUserData {
 
   @Field(() => String)
   @Length(3, 15)
+  @Matches(/^[a-z0-9_-]+$/, {
+    message:
+      'The username can only contain lowercase letters, numbers, underscores and hyphens'
+  })
+  @Transform(({ value }) => (value ? value.toLowerCase() : value))
   username: string
 
   @Field(() => String)
+  @MinLength(12)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).*$/, {
+    message:
+      'The password must contain at least one uppercase letter, one lowercase letter, one number and one special character.'
+  })
   password: string
 }
 
@@ -49,15 +61,6 @@ export class UpdateUserData {
   username?: string
 
   @Field(() => String, { nullable: true })
-  @MinLength(12)
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).*$/, {
-    message:
-      'The password must contain at least one uppercase letter, one lowercase letter, one number and one special character.'
-  })
-  @ValidateIf((_o, v) => v !== undefined)
-  password?: string
-
-  @Field(() => String, { nullable: true })
   @Length(3, 30)
   @ValidateIf((_o, v) => v !== undefined && v !== null)
   name?: string
@@ -72,4 +75,32 @@ export class UpdateUserArgs {
   @ValidateNested()
   @Type(() => UpdateUserData)
   data: UpdateUserData
+}
+
+@InputType()
+export class UpdateUserPasswordInput {
+  @Field(() => String)
+  oldPassword: string
+
+  @Field(() => String)
+  @MinLength(12)
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*\W).*$/, {
+    message:
+      'The password must contain at least one uppercase letter, one lowercase letter, one number and one special character.'
+  })
+  password: string
+
+  @Field(() => String)
+  @IsMatchWith(UpdateUserPasswordInput, ['password'], {
+    message: 'Passwords do not match'
+  })
+  confirmPassword: string
+}
+
+@ArgsType()
+export class UpdateUserPasswordArgs {
+  @Field(() => UpdateUserPasswordInput)
+  @ValidateNested()
+  @Type(() => UpdateUserPasswordInput)
+  data: UpdateUserPasswordInput
 }
