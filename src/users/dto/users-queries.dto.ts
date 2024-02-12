@@ -1,7 +1,9 @@
 import { ArgsType, Field, InputType, Int, ObjectType } from '@nestjs/graphql'
 import { Prisma } from '@prisma/client'
 import { Type } from 'class-transformer'
+import { IsEmail, Length, ValidateIf } from 'class-validator'
 
+import { IsCuid } from '@/lib/decorators/is-cuid.decorator'
 import {
   DateTimeFilter,
   SortOrder,
@@ -13,12 +15,18 @@ import { User } from '@/users/models/user.model'
 @InputType()
 export class UserWhereUniqueInput {
   @Field(() => String, { nullable: true })
+  @IsCuid()
+  @ValidateIf((o, v) => v !== undefined)
   id?: string
 
   @Field(() => String, { nullable: true })
+  @IsEmail()
+  @ValidateIf((o, v) => v !== undefined)
   email?: string
 
   @Field(() => String, { nullable: true })
+  @Length(3)
+  @ValidateIf((o, v) => v !== undefined)
   username?: string
 }
 
@@ -53,6 +61,18 @@ export class UserWhereInput {
 }
 
 @InputType()
+export class UserListRelationFilter {
+  @Field(() => UserWhereInput, { nullable: true })
+  every?: UserWhereInput
+
+  @Field(() => UserWhereInput, { nullable: true })
+  some?: UserWhereInput
+
+  @Field(() => UserWhereInput, { nullable: true })
+  none?: UserWhereInput
+}
+
+@InputType()
 export class UserOrderByInput {
   @Field(() => SortOrder, { nullable: true })
   id?: keyof typeof SortOrder
@@ -65,6 +85,33 @@ export class UserOrderByInput {
 
   @Field(() => SortOrderInput, { nullable: true })
   name?: SortOrderInput
+
+  @Field(() => SortOrder, { nullable: true })
+  createdAt?: keyof typeof SortOrder
+
+  @Field(() => SortOrder, { nullable: true })
+  updatedAt?: keyof typeof SortOrder
+}
+
+@InputType()
+export class UserOrderByWithRelationInput {
+  @Field(() => SortOrder, { nullable: true })
+  id?: keyof typeof SortOrder
+
+  @Field(() => SortOrder, { nullable: true })
+  email?: keyof typeof SortOrder
+
+  @Field(() => SortOrder, { nullable: true })
+  username?: keyof typeof SortOrder
+
+  @Field(() => SortOrderInput, { nullable: true })
+  name?: SortOrderInput
+
+  @Field(() => SortOrder, { nullable: true })
+  password?: keyof typeof SortOrder
+
+  @Field(() => SortOrderInput, { nullable: true })
+  avatarKey?: SortOrderInput
 
   @Field(() => SortOrder, { nullable: true })
   createdAt?: keyof typeof SortOrder

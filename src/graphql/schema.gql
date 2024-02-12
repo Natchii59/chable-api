@@ -2,6 +2,56 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type Channel {
+  createdAt: DateTime!
+  description: String
+  id: ID!
+  name: String
+  owner: User
+  ownerId: String
+  type: ChannelType!
+  updatedAt: DateTime!
+  users(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): [User!]
+}
+
+input ChannelOrderByWithRelationInput {
+  createdAt: SortOrder
+  description: SortOrderInput
+  id: SortOrder
+  name: SortOrderInput
+  owner: UserOrderByWithRelationInput
+  ownerId: SortOrderInput
+  type: SortOrder
+  updatedAt: SortOrder
+}
+
+enum ChannelType {
+  GROUP
+  PRIVATE
+  PUBLIC
+}
+
+input ChannelWhereInput {
+  AND: [ChannelWhereInput!]
+  NOT: [ChannelWhereInput!]
+  OR: [ChannelWhereInput!]
+  createdAt: DateTimeFilter
+  description: StringFilter
+  id: StringFilter
+  name: StringFilter
+  owner: UserWhereInput
+  ownerId: StringFilter
+  type: EnumChannelTypeFilter
+  updatedAt: DateTimeFilter
+  users: UserListRelationFilter
+}
+
+input CreateChannelInput {
+  name: String
+  type: ChannelType!
+  userIds: [String!]
+}
+
 input CreateUserData {
   email: String!
   password: String!
@@ -24,12 +74,25 @@ input DateTimeFilter {
   notIn: [DateTime!]
 }
 
+input EnumChannelTypeFilter {
+  equals: ChannelType
+  in: [ChannelType!]
+  not: EnumChannelTypeFilter
+  notIn: [ChannelType!]
+}
+
+type FindManyChannelsObject {
+  channels: [Channel!]!
+  count: Int!
+}
+
 type FindManyUserObject {
   count: Int!
   users: [User!]!
 }
 
 type Mutation {
+  createChannel(data: CreateChannelInput!): Channel
   createUser(data: CreateUserData!): User
   deleteUser: User
   login(email: String!, password: String!): User
@@ -46,6 +109,8 @@ enum NullsOrder {
 }
 
 type Query {
+  getChannel(id: String!): Channel
+  getChannels(orderBy: [ChannelOrderByWithRelationInput!], skip: Int, take: Int, where: ChannelWhereInput): FindManyChannelsObject
   getUser(where: UserWhereUniqueInput!): User
   getUsers(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): FindManyUserObject
   profile: User
@@ -100,12 +165,20 @@ scalar Upload
 type User {
   avatarKey: String
   avatarUrl: String
+  channels(orderBy: [ChannelOrderByWithRelationInput!], skip: Int, take: Int, where: ChannelWhereInput): [Channel!]
   createdAt: DateTime!
   email: String!
   id: ID!
   name: String
+  ownerChannels(orderBy: [ChannelOrderByWithRelationInput!], skip: Int, take: Int, where: ChannelWhereInput): [Channel!]
   updatedAt: DateTime!
   username: String!
+}
+
+input UserListRelationFilter {
+  every: UserWhereInput
+  none: UserWhereInput
+  some: UserWhereInput
 }
 
 input UserOrderByInput {
@@ -113,6 +186,17 @@ input UserOrderByInput {
   email: SortOrder
   id: SortOrder
   name: SortOrderInput
+  updatedAt: SortOrder
+  username: SortOrder
+}
+
+input UserOrderByWithRelationInput {
+  avatarKey: SortOrderInput
+  createdAt: SortOrder
+  email: SortOrder
+  id: SortOrder
+  name: SortOrderInput
+  password: SortOrder
   updatedAt: SortOrder
   username: SortOrder
 }

@@ -14,9 +14,12 @@ import { ServeStaticModule } from '@nestjs/serve-static'
 
 import { JwtAuthGuard } from '@/auth/guards/jwt.guard'
 import { JwtMiddleware } from '@/auth/middlewares/jwt.middleware'
+import { DataloaderService } from '@/dataloader/dataloader.service'
 import { SocketModule } from '@/socket/socket.module'
 import { AuthModule } from './auth/auth.module'
+import { ChannelsModule } from './channels/channels.module'
 import { DatabaseModule } from './database/database.module'
+import { DataloaderModule } from './dataloader/dataloader.module'
 import { UploadsModule } from './uploads/uploads.module'
 import { UsersModule } from './users/users.module'
 
@@ -26,26 +29,34 @@ import { UsersModule } from './users/users.module'
       envFilePath: '.env',
       isGlobal: true
     }),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      csrfPrevention: false,
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      playground: false,
-      plugins: [ApolloServerPluginLandingPageLocalDefault()],
-      autoSchemaFile: 'src/graphql/schema.gql',
-      sortSchema: true,
-      context: ({ req, res }) => ({ req, res }),
-      formatError: err => {
-        const { originalError } = err.extensions as any
+      imports: [DataloaderModule],
+      inject: [DataloaderService],
+      useFactory: (dataloader: DataloaderService) => ({
+        csrfPrevention: false,
+        playground: false,
+        plugins: [ApolloServerPluginLandingPageLocalDefault()],
+        autoSchemaFile: 'src/graphql/schema.gql',
+        sortSchema: true,
+        context: ({ req, res }) => ({
+          req,
+          res,
+          loaders: dataloader.getLoaders()
+        }),
+        formatError: err => {
+          const { originalError } = err.extensions as any
 
-        if (originalError) {
-          return {
-            ...originalError,
-            path: err.path
+          if (originalError) {
+            return {
+              ...originalError,
+              path: err.path
+            }
           }
-        }
 
-        return err
-      }
+          return err
+        }
+      })
     }),
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
@@ -55,7 +66,8 @@ import { UsersModule } from './users/users.module'
     UsersModule,
     AuthModule,
     UploadsModule,
-    SocketModule
+    SocketModule,
+    ChannelsModule
   ],
   providers: [
     {

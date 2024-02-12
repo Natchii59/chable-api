@@ -39,6 +39,7 @@
     "class-validator": "^0.14.1",
     "cookie": "^0.6.0",
     "cookie-parser": "^1.4.6",
+    "dataloader": "^2.2.2",
     "geoip-lite": "^1.4.9",
     "graphql": "^16.8.1",
     "graphql-upload-minimal": "^1.5.5",

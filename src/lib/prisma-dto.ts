@@ -1,33 +1,28 @@
 import { Field, InputType, Int, registerEnumType } from '@nestjs/graphql'
+import { ChannelType } from '@prisma/client'
 
 export enum SortOrder {
   asc = 'asc',
   desc = 'desc'
 }
 
-registerEnumType(SortOrder, { name: 'SortOrder', description: undefined })
+registerEnumType(SortOrder, { name: 'SortOrder' })
 
 export enum NullsOrder {
   first = 'first',
   last = 'last'
 }
 
-registerEnumType(NullsOrder, { name: 'NullsOrder', description: undefined })
+registerEnumType(NullsOrder, { name: 'NullsOrder' })
 
 export enum QueryMode {
   'default' = 'default',
   insensitive = 'insensitive'
 }
 
-registerEnumType(QueryMode, { name: 'QueryMode', description: undefined })
+registerEnumType(QueryMode, { name: 'QueryMode' })
 
-export enum ChannelType {
-  PUBLIC = 'PUBLIC',
-  PRIVATE = 'PRIVATE',
-  GROUP = 'GROUP'
-}
-
-registerEnumType(ChannelType, { name: 'ChannelType', description: undefined })
+registerEnumType(ChannelType, { name: 'ChannelType' })
 
 @InputType()
 export class SortOrderInput {
