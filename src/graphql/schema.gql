@@ -94,11 +94,13 @@ type FindManyUserObject {
 type Mutation {
   createChannel(data: CreateChannelInput!): Channel
   createUser(data: CreateUserData!): User
+  deleteChannel(id: String!): Boolean
   deleteUser: User
   login(email: String!, password: String!): User
   logout: Boolean
   refreshTokens: Boolean
   revokeRefreshToken(refreshTokenId: String!): Boolean
+  updateChannel(data: UpdateChannelData!, id: String!): Channel
   updateUser(data: UpdateUserData!): User
   updateUserPassword(data: UpdateUserPasswordInput!): Boolean
 }
@@ -144,6 +146,11 @@ input StringFilter {
   not: StringFilter
   notIn: [String!]
   startsWith: String
+}
+
+input UpdateChannelData {
+  description: [String!]
+  name: String
 }
 
 input UpdateUserData {

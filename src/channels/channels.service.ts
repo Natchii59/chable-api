@@ -43,12 +43,9 @@ export class ChannelsService {
     })
   }
 
-  getChannel(id: string, userId: string) {
+  getChannel(id: string) {
     return this.db.channel.findUnique({
-      where: {
-        id,
-        OR: [{ users: { some: { id: userId } } }, { type: ChannelType.PUBLIC }]
-      }
+      where: { id }
     })
   }
 
@@ -82,6 +79,19 @@ export class ChannelsService {
           }
         ]
       }
+    })
+  }
+
+  updateChannel(id: string, data: Prisma.ChannelUpdateInput) {
+    return this.db.channel.update({
+      where: { id },
+      data
+    })
+  }
+
+  deleteChannel(id: string) {
+    return this.db.channel.delete({
+      where: { id }
     })
   }
 }

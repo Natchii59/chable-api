@@ -11,6 +11,7 @@ import { ConfigModule } from '@nestjs/config'
 import { APP_GUARD } from '@nestjs/core'
 import { GraphQLModule } from '@nestjs/graphql'
 import { ServeStaticModule } from '@nestjs/serve-static'
+import { CaslModule } from 'nest-casl'
 
 import { JwtAuthGuard } from '@/auth/guards/jwt.guard'
 import { JwtMiddleware } from '@/auth/middlewares/jwt.middleware'
@@ -22,6 +23,8 @@ import { DatabaseModule } from './database/database.module'
 import { DataloaderModule } from './dataloader/dataloader.module'
 import { UploadsModule } from './uploads/uploads.module'
 import { UsersModule } from './users/users.module'
+
+import { JwtPayload } from 'types/auth'
 
 @Module({
   imports: [
@@ -61,6 +64,15 @@ import { UsersModule } from './users/users.module'
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, '..', 'uploads'),
       serveRoot: '/cdn'
+    }),
+    CaslModule.forRoot({
+      getUserFromRequest: req => {
+        const payload = req.user as unknown as JwtPayload
+        return {
+          id: payload.userId,
+          roles: null
+        }
+      }
     }),
     DatabaseModule,
     UsersModule,

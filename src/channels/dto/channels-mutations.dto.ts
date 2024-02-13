@@ -2,7 +2,8 @@ import { ArgsType, Field, InputType } from '@nestjs/graphql'
 import { ChannelType } from '@prisma/client'
 import { Type } from 'class-transformer'
 import {
-  IsNotEmpty,
+  Length,
+  MaxLength,
   Validate,
   ValidateIf,
   ValidateNested
@@ -38,4 +39,36 @@ export class CreateChannelArgs {
   @ValidateNested()
   @Type(() => CreateChannelInput)
   data: CreateChannelInput
+}
+
+@InputType()
+export class UpdateChannelData {
+  @Field(() => String, { nullable: true })
+  @Length(3)
+  @ValidateIf((o, v) => v !== undefined && v !== null)
+  name?: string
+
+  @Field(() => [String], { nullable: true })
+  @MaxLength(250)
+  @ValidateIf((o, v) => v !== undefined && v !== null)
+  description?: string
+}
+
+@ArgsType()
+export class UpdateChannelArgs {
+  @Field(() => String)
+  @IsCuid()
+  id: string
+
+  @Field(() => UpdateChannelData)
+  @ValidateNested()
+  @Type(() => UpdateChannelData)
+  data: UpdateChannelData
+}
+
+@ArgsType()
+export class DeleteChannelArgs {
+  @Field(() => String)
+  @IsCuid()
+  id: string
 }
