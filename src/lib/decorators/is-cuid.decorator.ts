@@ -6,7 +6,7 @@ import {
 } from 'class-validator'
 
 export function IsCuid(validationOpt?: ValidationOptions) {
-  return (obj: any, propertyName: string) => {
+  return (obj: object, propertyName: string) => {
     registerDecorator({
       target: obj.constructor,
       propertyName,

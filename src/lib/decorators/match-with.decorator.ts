@@ -10,15 +10,15 @@ export function IsMatchWith<T, K extends keyof T>(
   property?: readonly K[],
   validationOpt?: ValidationOptions
 ) {
-  return (obj: any, propertyName: string) => {
+  return (obj: object, propertyName: string) => {
     registerDecorator({
       target: obj.constructor,
       propertyName,
       options: validationOpt,
       constraints: [property],
       validator: {
-        validate(value: any, args: ValidationArguments) {
-          return !(value !== (args.object as any)[args.constraints[0]])
+        validate(value: string, args: ValidationArguments) {
+          return !(value !== args.object[args.constraints[0]])
         },
 
         defaultMessage({ property, constraints }: ValidationArguments): string {

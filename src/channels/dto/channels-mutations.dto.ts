@@ -52,6 +52,11 @@ export class UpdateChannelData {
   @MaxLength(250)
   @ValidateIf((o, v) => v !== undefined && v !== null)
   description?: string
+
+  @Field(() => String, { nullable: true })
+  @IsCuid()
+  @ValidateIf((o, v) => v !== undefined)
+  ownerId?: string
 }
 
 @ArgsType()
@@ -71,4 +76,15 @@ export class DeleteChannelArgs {
   @Field(() => String)
   @IsCuid()
   id: string
+}
+
+@ArgsType()
+export class JoinLeaveChannelArgs {
+  @Field(() => String)
+  @IsCuid()
+  id: string
+
+  @Field(() => [String])
+  @IsCuid({ each: true })
+  userIds: string[]
 }

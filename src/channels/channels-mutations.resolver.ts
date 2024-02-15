@@ -1,22 +1,18 @@
 import { BadRequestException, UseGuards } from '@nestjs/common'
 import { Args, Mutation, Resolver } from '@nestjs/graphql'
 import { ChannelType } from '@prisma/client'
-import {
-  AccessGuard,
-  Actions,
-  CaslSubject,
-  SubjectProxy,
-  UseAbility
-} from 'nest-casl'
+import { AccessGuard, CaslSubject, SubjectProxy, UseAbility } from 'nest-casl'
 
 import { CurrentUser } from '@/auth/decorators/current-user.decorator'
 import { ChannelsService } from '@/channels/channels.service'
 import {
   CreateChannelArgs,
   DeleteChannelArgs,
+  JoinLeaveChannelArgs,
   UpdateChannelArgs
 } from '@/channels/dto/channels-mutations.dto'
 import { Channel } from '@/channels/models/channel.model'
+import { ChannelActions } from '@/channels/permissions/channels.actions'
 import { ChannelHook } from '@/channels/permissions/channels.hooks'
 
 import { JwtPayload } from 'types/auth'
@@ -35,7 +31,7 @@ export class ChannelsMutationsResolver {
 
   @Mutation(() => Channel, { nullable: true })
   @UseGuards(AccessGuard)
-  @UseAbility(Actions.update, Channel, ChannelHook)
+  @UseAbility(ChannelActions.update, Channel, ChannelHook)
   async updateChannel(
     @Args() args: UpdateChannelArgs,
     @CaslSubject() subjectProxy: SubjectProxy<Channel>
@@ -62,8 +58,76 @@ export class ChannelsMutationsResolver {
 
   @Mutation(() => Boolean, { nullable: true })
   @UseGuards(AccessGuard)
-  @UseAbility(Actions.delete, Channel, ChannelHook)
-  deleteChannel(@Args() args: DeleteChannelArgs) {
-    return this.channelsService.deleteChannel(args.id)
+  @UseAbility(ChannelActions.delete, Channel, ChannelHook)
+  async deleteChannel(@Args() args: DeleteChannelArgs) {
+    await this.channelsService.deleteChannel(args.id)
+    return true
+  }
+
+  @Mutation(() => Boolean, { nullable: true })
+  @UseGuards(AccessGuard)
+  @UseAbility(ChannelActions.join, Channel, ChannelHook)
+  async joinChannel(
+    @Args() args: JoinLeaveChannelArgs,
+    @CaslSubject()
+    subjectProxy: SubjectProxy<Channel & { users: { id: string }[] }>,
+    @CurrentUser() payload: JwtPayload
+  ) {
+    const channel = await subjectProxy.get()
+
+    switch (channel.type) {
+      case 'PUBLIC':
+        if (args.userIds.some(id => id !== payload.userId)) {
+          throw new BadRequestException(
+            'Cannot add other users to public channel'
+          )
+        }
+        break
+      case 'GROUP':
+        if (channel.users.some(user => args.userIds.includes(user.id))) {
+          throw new BadRequestException('An user is already in the group')
+        }
+    }
+
+    await this.channelsService.joinChannel(args.id, args.userIds)
+
+    return true
+  }
+
+  @Mutation(() => Boolean, { nullable: true })
+  @UseGuards(AccessGuard)
+  @UseAbility(ChannelActions.leave, Channel, ChannelHook)
+  async leaveChannel(
+    @Args() args: JoinLeaveChannelArgs,
+    @CaslSubject()
+    subjectProxy: SubjectProxy<Channel & { users: { id: string }[] }>,
+    @CurrentUser() payload: JwtPayload
+  ) {
+    const channel = await subjectProxy.get()
+
+    switch (channel.type) {
+      case 'PUBLIC':
+      case 'GROUP':
+        if (!channel.users.some(user => args.userIds.includes(user.id))) {
+          throw new BadRequestException('An user is not in the channel')
+        } else if (
+          channel.ownerId !== payload.userId &&
+          args.userIds.some(id => id !== payload.userId)
+        ) {
+          throw new BadRequestException(
+            'Cannot remove other users from the channel'
+          )
+        } else if (
+          channel.ownerId === payload.userId &&
+          args.userIds.some(id => id === payload.userId)
+        ) {
+          throw new BadRequestException('Cannot remove owner from the channel')
+        }
+        break
+    }
+
+    await this.channelsService.leaveChannel(args.id, args.userIds)
+
+    return true
   }
 }

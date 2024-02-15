@@ -2,6 +2,7 @@ import { join } from 'path'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'
 import {
+  HttpException,
   MiddlewareConsumer,
   Module,
   NestModule,
@@ -48,7 +49,7 @@ import { JwtPayload } from 'types/auth'
           loaders: dataloader.getLoaders()
         }),
         formatError: err => {
-          const { originalError } = err.extensions as any
+          const originalError = err.extensions.originalError as HttpException
 
           if (originalError) {
             return {

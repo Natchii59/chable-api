@@ -17,4 +17,3 @@
   "importOrderParserPlugins": ["typescript", "decorators-legacy"],
   "plugins": ["@ianvs/prettier-plugin-sort-imports"]
 }
-

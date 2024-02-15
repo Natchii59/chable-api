@@ -96,6 +96,8 @@ type Mutation {
   createUser(data: CreateUserData!): User
   deleteChannel(id: String!): Boolean
   deleteUser: User
+  joinChannel(id: String!, userIds: [String!]!): Boolean
+  leaveChannel(id: String!, userIds: [String!]!): Boolean
   login(email: String!, password: String!): User
   logout: Boolean
   refreshTokens: Boolean
@@ -151,6 +153,7 @@ input StringFilter {
 input UpdateChannelData {
   description: [String!]
   name: String
+  ownerId: String
 }
 
 input UpdateUserData {

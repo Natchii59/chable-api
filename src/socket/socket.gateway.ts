@@ -1,16 +1,22 @@
+import { UseFilters, UsePipes } from '@nestjs/common'
 import {
+  ConnectedSocket,
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
-  WebSocketServer
+  WebSocketServer,
+  WsException
 } from '@nestjs/websockets'
 import { parse as parseCookie } from 'cookie'
 import { Server } from 'socket.io'
 
 import { SessionsService } from '@/auth/sessions.service'
-import { Events } from '@/lib/events'
+import { SocketEvents } from '@/lib/socket-events'
+import { SocketChannelInput } from '@/socket/dto/socket-channel.dto'
+import { WsExceptionFilter } from '@/socket/utils/ws-exception.filter'
+import { WsValidationPipe } from '@/socket/utils/ws-validation.pipe'
 
 import { Socket } from 'types/socket'
 
@@ -19,6 +25,8 @@ import { Socket } from 'types/socket'
     credentials: true
   }
 })
+@UseFilters(new WsExceptionFilter())
+@UsePipes(new WsValidationPipe({ transform: true }))
 export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private sessionsService: SessionsService) {}
 
@@ -54,8 +62,83 @@ export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('Socket disconnected:', socket.id)
   }
 
-  @SubscribeMessage(Events.MESSAGE)
-  handleMessage(@MessageBody() payload: string) {
-    this.server.emit(Events.MESSAGE, payload)
+  @SubscribeMessage(SocketEvents.JOIN_CHANNEL_ROOM_SERVER)
+  async handleJoinChannelRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketChannelInput
+  ) {
+    const userId = socket.data.user.id
+
+    if (!socket.rooms.has(`users-on-channel:${input.id}`)) {
+      throw new WsException({
+        message: 'You are not allowed to join this channel'
+      })
+    }
+
+    socket.join(`channel:${input.id}`)
+
+    socket.emit(SocketEvents.JOIN_CHANNEL_ROOM_CLIENT, {
+      channelId: input.id,
+      userId
+    })
+  }
+
+  @SubscribeMessage(SocketEvents.LEAVE_CHANNEL_ROOM_SERVER)
+  async handleLeaveChannelRoom(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketChannelInput
+  ) {
+    const userId = socket.data.user.id
+
+    if (!socket.rooms.has(`channel:${input.id}`)) {
+      throw new WsException({
+        message: 'You are not allowed to leave this channel'
+      })
+    }
+
+    socket.leave(`channel:${input.id}`)
+
+    socket.emit(SocketEvents.LEAVE_CHANNEL_ROOM_CLIENT, {
+      channelId: input.id,
+      userId
+    })
+  }
+
+  @SubscribeMessage(SocketEvents.TYPING_START_SERVER)
+  async handleTypingStart(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketChannelInput
+  ) {
+    const userId = socket.data.user.id
+
+    if (!socket.rooms.has(`channel:${input.id}`)) {
+      throw new WsException({
+        message: 'You are not allowed to send typing events to this channel'
+      })
+    }
+
+    socket.to(`channel:${input.id}`).emit(SocketEvents.TYPING_START_CLIENT, {
+      channelId: input.id,
+      userId
+    })
+  }
+
+  @SubscribeMessage(SocketEvents.TYPING_STOP_SERVER)
+  async handleTypingStop(
+    @ConnectedSocket() socket: Socket,
+    @MessageBody() input: SocketChannelInput
+  ) {
+    const userId = socket.data.user.id
+
+    if (!socket.rooms.has(`channel:${input.id}`)) {
+      throw new WsException({
+        message: 'You are not allowed to send typing events to this channel'
+      })
+    }
+
+    socket.to(`channel:${input.id}`).emit(SocketEvents.TYPING_STOP_CLIENT, {
+      channelId: input.id,
+      userId
+    })
   }
 }

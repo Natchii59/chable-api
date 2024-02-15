@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common'
 import { Request, SubjectBeforeFilterHook } from 'nest-casl'
 
-import { ChannelsService } from '@/channels/channels.service'
 import { Channel } from '@/channels/models/channel.model'
 import { DatabaseService } from '@/database/database.service'
 

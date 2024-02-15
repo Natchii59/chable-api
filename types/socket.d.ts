@@ -6,4 +6,14 @@ interface SocketData {
   }
 }
 
-export type Socket = BaseSocket<undefined, undefined, undefined, SocketData>
+export type Socket = BaseSocket<
+  ListenEvents,
+  EmitEvents,
+  ServerSideEvents,
+  SocketData
+>
+
+export type SocketError = {
+  type?: string
+  message: string | object
+}
