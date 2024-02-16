@@ -98,7 +98,7 @@ export class ChannelOrderByWithRelationInput {
 }
 
 @ArgsType()
-export class GetChannelArgs {
+export class FindUniqueChannelArgs {
   @Field(() => String)
   @IsCuid()
   id: string

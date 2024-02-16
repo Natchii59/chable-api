@@ -7,7 +7,7 @@ import { ChannelsService } from '@/channels/channels.service'
 import {
   FindManyChannelsArgs,
   FindManyChannelsObject,
-  GetChannelArgs
+  FindUniqueChannelArgs
 } from '@/channels/dto/channels-queries.dto'
 import { Channel } from '@/channels/models/channel.model'
 import { ChannelHook } from '@/channels/permissions/channels.hooks'
@@ -21,7 +21,7 @@ export class ChannelsQueriesResolver {
   @Query(() => Channel, { nullable: true })
   @UseGuards(AccessGuard)
   @UseAbility(Actions.read, Channel, ChannelHook)
-  getChannel(@Args() args: GetChannelArgs) {
+  getChannel(@Args() args: FindUniqueChannelArgs) {
     return this.channelsService.getChannel(args.id)
   }
 

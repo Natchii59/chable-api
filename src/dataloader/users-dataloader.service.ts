@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common'
-import { Prisma } from '@prisma/client'
+import { ChannelType, Prisma } from '@prisma/client'
 
 import { DatabaseService } from '@/database/database.service'
 
@@ -7,25 +7,63 @@ import { DatabaseService } from '@/database/database.service'
 export class UsersDataloaderService {
   constructor(private db: DatabaseService) {}
 
-  async getChannelsUsersByBatch(
-    channelIds: string[],
-    args?: Prisma.UserFindManyArgs
+  async getChannelsByBatch(
+    userIds: string[],
+    currentUserId: string,
+    args?: Prisma.ChannelFindManyArgs
   ) {
-    const users = await this.db.user.findMany({
+    const channels = await this.db.channel.findMany({
       ...args,
       where: {
         AND: [
-          { ...args.where },
-          { channels: { some: { id: { in: channelIds } } } }
+          {
+            AND: [
+              { ...args.where },
+              { users: { some: { id: { in: userIds } } } }
+            ]
+          },
+          {
+            OR: [
+              { users: { some: { id: currentUserId } } },
+              { type: ChannelType.PUBLIC }
+            ]
+          }
         ]
       },
       include: {
-        channels: { select: { id: true } }
+        users: { select: { id: true } }
       }
     })
 
-    return channelIds.map(channelId =>
-      users.filter(user => user.channels.some(ch => ch.id === channelId))
+    return userIds.map(userId =>
+      channels.filter(channel => channel.users.some(u => u.id === userId))
+    )
+  }
+
+  async getOwnerChannelsByBatch(
+    userIds: string[],
+    currentUserId: string,
+    args?: Prisma.ChannelFindManyArgs
+  ) {
+    const channels = await this.db.channel.findMany({
+      ...args,
+      where: {
+        AND: [
+          {
+            AND: [{ ...args.where }, { ownerId: { in: userIds } }]
+          },
+          {
+            OR: [
+              { users: { some: { id: currentUserId } } },
+              { type: ChannelType.PUBLIC }
+            ]
+          }
+        ]
+      }
+    })
+
+    return userIds.map(userId =>
+      channels.filter(channel => channel.ownerId === userId)
     )
   }
 }

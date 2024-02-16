@@ -16,34 +16,75 @@ import {
 import { Channel } from '@/channels/models/channel.model'
 import { Dataloaders } from '@/dataloader/dataloader.interface'
 import { ParentArgs } from '@/lib/decorators/parent-args.decorator'
+import { FindManyMessageArgs } from '@/messages/dto/messages-queries.dto'
+import { Message } from '@/messages/models/message.model'
 import { FindManyUserArgs } from '@/users/dto/users-queries.dto'
 import { User } from '@/users/models/user.model'
-import { UsersService } from '@/users/users.service'
 
 import { JwtPayload } from 'types/auth'
 
 @Resolver(() => Channel)
 export class ChannelsFieldsResolver {
-  constructor(private usersService: UsersService) {}
+  constructor() {}
 
   @ResolveField(() => User, { nullable: true })
-  owner(@Parent() channel: Channel) {
-    if (!channel.ownerId) {
-      return null
-    }
+  owner(@Parent() channel: Channel, @Context('loaders') loaders: Dataloaders) {
+    if (!channel.ownerId) return null
 
-    return this.usersService.getUser({ id: channel.ownerId })
+    return loaders.channels.ownerLoader.load(channel.ownerId)
   }
 
-  @ResolveField(() => [User], { nullable: true })
+  @ResolveField(() => [User])
   users(
     @Parent() channel: Channel,
     @Args() args: FindManyUserArgs,
     @Context('loaders') loaders: Dataloaders
   ) {
-    return loaders.channelsUsersLoader.load({
+    return loaders.channels.usersLoader.load({
       channelId: channel.id,
       args
+    })
+  }
+
+  @ResolveField(() => [Message], { nullable: true })
+  async messages(
+    @Parent() channel: Channel,
+    @Args() args: FindManyMessageArgs,
+    @Context('loaders') loaders: Dataloaders,
+    @CurrentUser() payload: JwtPayload
+  ) {
+    const users = await loaders.channels.usersLoader.load({
+      channelId: channel.id,
+      args: {
+        where: { id: payload.userId }
+      }
+    })
+
+    if (!users.length) return null
+
+    return loaders.channels.messagesLoader.load({
+      channelId: channel.id,
+      args
+    })
+  }
+
+  @ResolveField(() => Message, { nullable: true })
+  lastMessage(
+    @Parent() channel: Channel,
+    @Context('loaders') loaders: Dataloaders
+  ) {
+    return loaders.channels.lastMessageLoader.load(channel.id)
+  }
+
+  @ResolveField(() => Int)
+  unreadMessages(
+    @Parent() channel: Channel,
+    @Context('loaders') loaders: Dataloaders,
+    @CurrentUser() payload: JwtPayload
+  ) {
+    return loaders.channels.unreadMessagesLoader.load({
+      channelId: channel.id,
+      currentUserId: payload.userId
     })
   }
 }

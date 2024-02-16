@@ -36,7 +36,7 @@ export class UsersFieldsResolver {
     @Args() args: FindManyChannelsArgs,
     @Context('loaders') loaders: Dataloaders
   ) {
-    return loaders.usersChannelsLoader.load({
+    return loaders.users.channelsLoader.load({
       userId: user.id,
       currentUserId: user.id,
       args
@@ -49,7 +49,7 @@ export class UsersFieldsResolver {
     @Args() args: FindManyChannelsArgs,
     @Context('loaders') loaders: Dataloaders
   ) {
-    return loaders.usersOwnerChannelsLoader.load({
+    return loaders.users.ownerChannelsLoader.load({
       userId: user.id,
       currentUserId: user.id,
       args

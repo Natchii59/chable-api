@@ -75,21 +75,23 @@ export class ChannelsMutationsResolver {
   ) {
     const channel = await subjectProxy.get()
 
+    const userIds = args.userIds?.length ? args.userIds : [payload.userId]
+
     switch (channel.type) {
       case 'PUBLIC':
-        if (args.userIds.some(id => id !== payload.userId)) {
+        if (userIds.some(id => id !== payload.userId)) {
           throw new BadRequestException(
             'Cannot add other users to public channel'
           )
         }
         break
       case 'GROUP':
-        if (channel.users.some(user => args.userIds.includes(user.id))) {
+        if (channel.users.some(user => userIds.includes(user.id))) {
           throw new BadRequestException('An user is already in the group')
         }
     }
 
-    await this.channelsService.joinChannel(args.id, args.userIds)
+    await this.channelsService.joinChannel(args.id, userIds)
 
     return true
   }
@@ -105,28 +107,30 @@ export class ChannelsMutationsResolver {
   ) {
     const channel = await subjectProxy.get()
 
+    const userIds = args.userIds?.length ? args.userIds : [payload.userId]
+
     switch (channel.type) {
       case 'PUBLIC':
       case 'GROUP':
-        if (!channel.users.some(user => args.userIds.includes(user.id))) {
+        if (!channel.users.some(user => userIds.includes(user.id))) {
           throw new BadRequestException('An user is not in the channel')
         } else if (
           channel.ownerId !== payload.userId &&
-          args.userIds.some(id => id !== payload.userId)
+          userIds.some(id => id !== payload.userId)
         ) {
           throw new BadRequestException(
             'Cannot remove other users from the channel'
           )
         } else if (
           channel.ownerId === payload.userId &&
-          args.userIds.some(id => id === payload.userId)
+          userIds.some(id => id === payload.userId)
         ) {
           throw new BadRequestException('Cannot remove owner from the channel')
         }
         break
     }
 
-    await this.channelsService.leaveChannel(args.id, args.userIds)
+    await this.channelsService.leaveChannel(args.id, userIds)
 
     return true
   }

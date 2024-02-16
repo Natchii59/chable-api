@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common'
 
 import { ChannelsDataloaderService } from '@/dataloader/channels-dataloader.service'
+import { MessagesDataloaderService } from '@/dataloader/messages-dataloader.service'
 import { UsersDataloaderService } from '@/dataloader/users-dataloader.service'
 import { DataloaderService } from './dataloader.service'
 
@@ -8,7 +9,8 @@ import { DataloaderService } from './dataloader.service'
   providers: [
     DataloaderService,
     UsersDataloaderService,
-    ChannelsDataloaderService
+    ChannelsDataloaderService,
+    MessagesDataloaderService
   ],
   exports: [DataloaderService]
 })

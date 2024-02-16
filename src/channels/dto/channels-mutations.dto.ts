@@ -84,7 +84,8 @@ export class JoinLeaveChannelArgs {
   @IsCuid()
   id: string
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: true })
   @IsCuid({ each: true })
-  userIds: string[]
+  @ValidateIf((o, v) => v !== undefined)
+  userIds?: string[]
 }

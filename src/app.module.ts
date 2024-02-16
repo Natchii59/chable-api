@@ -22,6 +22,7 @@ import { AuthModule } from './auth/auth.module'
 import { ChannelsModule } from './channels/channels.module'
 import { DatabaseModule } from './database/database.module'
 import { DataloaderModule } from './dataloader/dataloader.module'
+import { MessagesModule } from './messages/messages.module'
 import { UploadsModule } from './uploads/uploads.module'
 import { UsersModule } from './users/users.module'
 
@@ -80,7 +81,8 @@ import { JwtPayload } from 'types/auth'
     AuthModule,
     UploadsModule,
     SocketModule,
-    ChannelsModule
+    ChannelsModule,
+    MessagesModule
   ],
   providers: [
     {

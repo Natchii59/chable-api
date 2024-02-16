@@ -6,12 +6,15 @@ type Channel {
   createdAt: DateTime!
   description: String
   id: ID!
+  lastMessage: Message
+  messages(orderBy: [MessageOrderByWithRelationInput!], skip: Int, take: Int, where: MessageWhereInput): [Message!]
   name: String
   owner: User
   ownerId: String
   type: ChannelType!
+  unreadMessages: Int!
   updatedAt: DateTime!
-  users(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): [User!]
+  users(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
 }
 
 input ChannelOrderByWithRelationInput {
@@ -52,6 +55,11 @@ input CreateChannelInput {
   userIds: [String!]
 }
 
+input CreateMessageInput {
+  channelId: String!
+  text: String!
+}
+
 input CreateUserData {
   email: String!
   password: String!
@@ -86,23 +94,69 @@ type FindManyChannelsObject {
   count: Int!
 }
 
+type FindManyMessagesObject {
+  count: Int!
+  messages: [Message!]!
+}
+
 type FindManyUserObject {
   count: Int!
   users: [User!]!
 }
 
+type Message {
+  author: User!
+  authorId: String!
+  channel: Channel!
+  channelId: String!
+  createdAt: DateTime!
+  id: ID!
+  readBy(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): [User!]!
+  text: String!
+  updatedAt: DateTime!
+}
+
+input MessageOrderByWithRelationInput {
+  author: UserOrderByWithRelationInput
+  authorId: SortOrder
+  channel: ChannelOrderByWithRelationInput
+  channelId: SortOrder
+  createdAt: SortOrder
+  id: SortOrder
+  text: SortOrder
+  updatedAt: SortOrder
+}
+
+input MessageWhereInput {
+  AND: [MessageWhereInput!]
+  NOT: [MessageWhereInput!]
+  OR: [MessageWhereInput!]
+  author: UserWhereInput
+  authorId: StringFilter
+  channel: ChannelWhereInput
+  channelId: StringFilter
+  createdAt: DateTimeFilter
+  id: StringFilter
+  readBy: UserListRelationFilter
+  text: StringFilter
+  updatedAt: DateTimeFilter
+}
+
 type Mutation {
   createChannel(data: CreateChannelInput!): Channel
+  createMessage(data: CreateMessageInput!): Message
   createUser(data: CreateUserData!): User
   deleteChannel(id: String!): Boolean
+  deleteMessage(id: String!): Boolean
   deleteUser: User
-  joinChannel(id: String!, userIds: [String!]!): Boolean
-  leaveChannel(id: String!, userIds: [String!]!): Boolean
+  joinChannel(id: String!, userIds: [String!]): Boolean
+  leaveChannel(id: String!, userIds: [String!]): Boolean
   login(email: String!, password: String!): User
   logout: Boolean
   refreshTokens: Boolean
   revokeRefreshToken(refreshTokenId: String!): Boolean
   updateChannel(data: UpdateChannelData!, id: String!): Channel
+  updateMessage(data: UpdateMessageInput!, id: String!): Message
   updateUser(data: UpdateUserData!): User
   updateUserPassword(data: UpdateUserPasswordInput!): Boolean
 }
@@ -115,6 +169,8 @@ enum NullsOrder {
 type Query {
   getChannel(id: String!): Channel
   getChannels(orderBy: [ChannelOrderByWithRelationInput!], skip: Int, take: Int, where: ChannelWhereInput): FindManyChannelsObject
+  getMessage(id: String!): Message
+  getMessages(orderBy: [MessageOrderByWithRelationInput!], skip: Int, take: Int, where: MessageWhereInput): FindManyMessagesObject
   getUser(where: UserWhereUniqueInput!): User
   getUsers(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): FindManyUserObject
   profile: User
@@ -154,6 +210,10 @@ input UpdateChannelData {
   description: [String!]
   name: String
   ownerId: String
+}
+
+input UpdateMessageInput {
+  text: String
 }
 
 input UpdateUserData {
