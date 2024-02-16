@@ -9,6 +9,7 @@ import {
   CreateChannelArgs,
   DeleteChannelArgs,
   JoinLeaveChannelArgs,
+  ReadChannelArgs,
   UpdateChannelArgs
 } from '@/channels/dto/channels-mutations.dto'
 import { Channel } from '@/channels/models/channel.model'
@@ -132,6 +133,17 @@ export class ChannelsMutationsResolver {
 
     await this.channelsService.leaveChannel(args.id, userIds)
 
+    return true
+  }
+
+  @Mutation(() => Boolean, { nullable: true })
+  @UseGuards(AccessGuard)
+  @UseAbility(ChannelActions.read, Channel, ChannelHook)
+  async readChannel(
+    @Args() args: ReadChannelArgs,
+    @CurrentUser() payload: JwtPayload
+  ) {
+    await this.channelsService.readChannel(args.id, payload.userId)
     return true
   }
 }

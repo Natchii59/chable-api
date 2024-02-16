@@ -153,6 +153,7 @@ type Mutation {
   leaveChannel(id: String!, userIds: [String!]): Boolean
   login(email: String!, password: String!): User
   logout: Boolean
+  readChannel(id: String!): Boolean
   refreshTokens: Boolean
   revokeRefreshToken(refreshTokenId: String!): Boolean
   updateChannel(data: UpdateChannelData!, id: String!): Channel

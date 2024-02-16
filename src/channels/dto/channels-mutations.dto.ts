@@ -15,6 +15,13 @@ import {
 } from '@/channels/dto/channels.validators'
 import { IsCuid } from '@/lib/decorators/is-cuid.decorator'
 
+@ArgsType()
+class ChannelIdArgs {
+  @Field(() => String)
+  @IsCuid()
+  id: string
+}
+
 @InputType()
 export class CreateChannelInput {
   @Field(() => ChannelType)
@@ -60,11 +67,7 @@ export class UpdateChannelData {
 }
 
 @ArgsType()
-export class UpdateChannelArgs {
-  @Field(() => String)
-  @IsCuid()
-  id: string
-
+export class UpdateChannelArgs extends ChannelIdArgs {
   @Field(() => UpdateChannelData)
   @ValidateNested()
   @Type(() => UpdateChannelData)
@@ -72,20 +75,15 @@ export class UpdateChannelArgs {
 }
 
 @ArgsType()
-export class DeleteChannelArgs {
-  @Field(() => String)
-  @IsCuid()
-  id: string
-}
+export class DeleteChannelArgs extends ChannelIdArgs {}
 
 @ArgsType()
-export class JoinLeaveChannelArgs {
-  @Field(() => String)
-  @IsCuid()
-  id: string
-
+export class JoinLeaveChannelArgs extends ChannelIdArgs {
   @Field(() => [String], { nullable: true })
   @IsCuid({ each: true })
   @ValidateIf((o, v) => v !== undefined)
   userIds?: string[]
 }
+
+@ArgsType()
+export class ReadChannelArgs extends ChannelIdArgs {}

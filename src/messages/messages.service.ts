@@ -2,13 +2,36 @@ import { Injectable } from '@nestjs/common'
 import { Prisma } from '@prisma/client'
 
 import { DatabaseService } from '@/database/database.service'
+import { SocketEvents } from '@/lib/socket-events'
+import { SocketGateway } from '@/socket/socket.gateway'
 
 @Injectable()
 export class MessagesService {
-  constructor(private db: DatabaseService) {}
+  constructor(
+    private db: DatabaseService,
+    private io: SocketGateway
+  ) {}
 
-  createMessage(data: Prisma.MessageUncheckedCreateInput) {
-    return this.db.message.create({ data })
+  async createMessage(data: Prisma.MessageUncheckedCreateInput) {
+    const message = await this.db.message.create({
+      data,
+      include: {
+        author: {
+          select: {
+            id: true,
+            username: true,
+            name: true,
+            avatarKey: true
+          }
+        }
+      }
+    })
+
+    this.io.server
+      .to(`users-on-channel:${message.channelId}`)
+      .emit(SocketEvents.CREATE_MESSAGE_CLIENT, { message })
+
+    return message
   }
 
   getMessage(id: string) {
@@ -46,14 +69,26 @@ export class MessagesService {
     })
   }
 
-  updateMessage(id: string, data: Prisma.MessageUpdateInput) {
-    return this.db.message.update({
+  async updateMessage(id: string, data: Prisma.MessageUpdateInput) {
+    const message = await this.db.message.update({
       where: { id },
       data
     })
+
+    this.io.server
+      .to(`channel:${message.channelId}`)
+      .emit(SocketEvents.UPDATE_MESSAGE_CLIENT, { message })
+
+    return message
   }
 
-  deleteMessage(id: string) {
-    return this.db.message.delete({ where: { id } })
+  async deleteMessage(id: string) {
+    const message = await this.db.message.delete({ where: { id } })
+
+    this.io.server
+      .to(`channel:${message.channelId}`)
+      .emit(SocketEvents.DELETE_MESSAGE_CLIENT, { message })
+
+    return message
   }
 }

@@ -16,5 +16,11 @@ export enum SocketEvents {
   TYPING_START_SERVER = 'typing-start-server',
   TYPING_START_CLIENT = 'typing-start-client',
   TYPING_STOP_SERVER = 'typing-stop-server',
-  TYPING_STOP_CLIENT = 'typing-stop-client'
+  TYPING_STOP_CLIENT = 'typing-stop-client',
+
+  CREATE_MESSAGE_CLIENT = 'create-message-client',
+  UPDATE_MESSAGE_CLIENT = 'update-message-client',
+  DELETE_MESSAGE_CLIENT = 'delete-message-client',
+
+  READ_CHANNEL_CLIENT = 'read-channel-client'
 }

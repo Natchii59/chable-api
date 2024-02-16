@@ -29,7 +29,10 @@ export class MessagesMutationsResolver {
   ) {
     return this.messagesService.createMessage({
       ...args.data,
-      authorId: payload.userId
+      authorId: payload.userId,
+      readBy: {
+        connect: { id: payload.userId }
+      }
     })
   }
 

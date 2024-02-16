@@ -195,4 +195,28 @@ export class ChannelsService {
         userIds
       })
   }
+
+  async readChannel(id: string, userId: string) {
+    const messages = await this.db.message.findMany({
+      where: {
+        channelId: id,
+        readBy: { none: { id: userId } }
+      },
+      select: { id: true }
+    })
+
+    await this.db.user.update({
+      where: { id: userId },
+      data: {
+        readMessages: {
+          connect: messages
+        }
+      }
+    })
+
+    this.io.server.to(`channel:${id}`).emit(SocketEvents.READ_CHANNEL_CLIENT, {
+      channelId: id,
+      userId
+    })
+  }
 }
