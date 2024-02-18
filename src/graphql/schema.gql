@@ -170,9 +170,11 @@ enum NullsOrder {
 type Query {
   getChannel(id: String!): Channel
   getChannels(orderBy: [ChannelOrderByWithRelationInput!], skip: Int, take: Int, where: ChannelWhereInput): FindManyChannelsObject
+  getCurrentSession: Session
   getMessage(id: String!): Message
   getMessages(orderBy: [MessageOrderByWithRelationInput!], skip: Int, take: Int, where: MessageWhereInput): FindManyMessagesObject
   getUser(where: UserWhereUniqueInput!): User
+  getUserSessions: [Session!]
   getUsers(orderBy: [UserOrderByInput!], skip: Int, take: Int, where: UserWhereInput): FindManyUserObject
   profile: User
 }
@@ -180,6 +182,14 @@ type Query {
 enum QueryMode {
   default
   insensitive
+}
+
+type Session {
+  browser: String!
+  createdAt: DateTime!
+  id: ID!
+  os: String!
+  updatedAt: DateTime!
 }
 
 enum SortOrder {

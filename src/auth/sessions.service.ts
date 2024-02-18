@@ -129,4 +129,15 @@ export class SessionsService {
       throw new UnauthorizedException('Invalid refresh token.')
     }
   }
+
+  async getSession(id: string) {
+    return this.db.session.findUnique({ where: { id } })
+  }
+
+  async getUserSessions(userId: string) {
+    return this.db.session.findMany({
+      where: { userId },
+      orderBy: { updatedAt: 'desc' }
+    })
+  }
 }
